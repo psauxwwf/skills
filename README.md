@@ -12,22 +12,10 @@ Use one of these commands:
 skills add devil666face/skills
 ```
 
-or
-
-```bash
-npx skills add devil666face/skills
-```
-
 ## Install a specific skill
 
 For example, install only `yotube-transcribe`:
 
 ```bash
 skills add devil666face/skills --skill yotube-transcribe
-```
-
-or
-
-```bash
-npx skills add devil666face/skills --skill yotube-transcribe
 ```

@@ -1,0 +1,117 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+usage() {
+  cat >&2 <<EOF
+Usage:
+  $(basename "$0") <input.excalidraw> [output.png] [scale] [max_width]
+  $(basename "$0") --help
+
+Render an Excalidraw JSON file to PNG using agent-browser and the local
+HTML renderer template at references/render_template.html.
+
+Arguments:
+  input.excalidraw  Path to the source .excalidraw file.
+  output.png        Optional output PNG path.
+                    Default: same path as input with .png extension.
+  scale             Optional device pixel ratio for screenshot output.
+                    Default: 2
+  max_width         Optional maximum output width in CSS pixels.
+                    If the rendered diagram is wider, it is scaled down
+                    proportionally before capture.
+                    Default: 1920
+
+Dependencies:
+  agent-browser     Browser automation CLI used for rendering and capture.
+  jq                Used to parse rendered SVG dimensions.
+
+Examples:
+  $(basename "$0") diagram.excalidraw
+  $(basename "$0") diagram.excalidraw diagram.png
+  $(basename "$0") diagram.excalidraw diagram.png 2 1920
+
+Exit status:
+  0  Success
+  1  Invalid arguments, missing dependencies, missing files, or render failure
+EOF
+}
+
+if [ "$#" -eq 1 ] && { [ "$1" = "--help" ] || [ "$1" = "-h" ]; }; then
+  usage
+  exit 0
+fi
+
+if [ "$#" -lt 1 ] || [ "$#" -gt 4 ]; then
+  usage
+  exit 1
+fi
+
+if ! command -v agent-browser >/dev/null 2>&1; then
+  printf 'ERROR: agent-browser is not installed\n' >&2
+  exit 1
+fi
+
+if ! command -v jq >/dev/null 2>&1; then
+  printf 'ERROR: jq is not installed\n' >&2
+  exit 1
+fi
+
+input="$(realpath "$1")"
+if [ ! -f "$input" ]; then
+  printf 'ERROR: File not found: %s\n' "$1" >&2
+  exit 1
+fi
+
+case "$input" in
+  *.excalidraw) ;;
+  *)
+    printf 'ERROR: Input must be an .excalidraw file\n' >&2
+    exit 1
+    ;;
+esac
+
+if [ "$#" -ge 2 ]; then
+  output="$(realpath -m "$2")"
+else
+  output="${input%.excalidraw}.png"
+fi
+
+scale="${3:-2}"
+max_width="${4:-1920}"
+template="$(realpath "$(dirname "$0")/../references/render_template.html")"
+
+if [ ! -f "$template" ]; then
+  printf 'ERROR: Template not found: %s\n' "$template" >&2
+  exit 1
+fi
+
+session="excalidraw-render-$$"
+dims="/tmp/${session}.json"
+
+cleanup() {
+  agent-browser --session "$session" close >/dev/null 2>&1 || true
+  rm -f "$dims"
+}
+
+trap cleanup EXIT
+
+agent-browser --session "$session" open "file://$input"
+agent-browser --session "$session" eval 'window.name = document.body.innerText' >/dev/null
+agent-browser --session "$session" open "file://$template"
+agent-browser --session "$session" wait --fn "window.__moduleReady === true"
+agent-browser --session "$session" eval '(async () => await window.renderDiagram(JSON.parse(window.name)))()' >/dev/null
+agent-browser --session "$session" wait --fn "window.__renderComplete === true"
+agent-browser --session "$session" eval '(() => { const svg = document.querySelector("#root svg"); if (!svg) throw new Error("No SVG after render"); const rect = svg.getBoundingClientRect(); return { width: Math.ceil(rect.width), height: Math.ceil(rect.height) }; })()' > "$dims"
+
+width="$(jq -r '.width' "$dims")"
+height="$(jq -r '.height' "$dims")"
+ratio="$(jq -n --argjson w "$width" --argjson m "$max_width" 'if $w > $m then ($m / $w) else 1 end')"
+target_width="$(jq -n --argjson w "$width" --argjson r "$ratio" '($w * $r | ceil)')"
+target_height="$(jq -n --argjson h "$height" --argjson r "$ratio" '($h * $r | ceil)')"
+
+agent-browser --session "$session" eval "(() => { const root = document.getElementById('root'); root.style.transform = 'scale($ratio)'; root.style.transformOrigin = 'top left'; document.body.style.width = '${target_width}px'; document.body.style.height = '${target_height}px'; return true; })()" >/dev/null
+agent-browser --session "$session" set viewport "$target_width" "$target_height" "$scale"
+agent-browser --session "$session" screenshot "$output"
+
+printf '%s\n' "$output"
