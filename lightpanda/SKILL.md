@@ -1,14 +1,10 @@
 ---
 name: lightpanda
-description: Use for Lightpanda tasks: installation, CLI usage, CDP server setup, and browser automation/scraping via Playwright, Puppeteer, chromedp, or Python.
+description: Use for lightpanda CLI usage, CDP server setup, and browser automation/scraping via Playwright, Puppeteer, chromedp, or Python.
 metadata:
   tags: "lightpanda, headless-browser, cdp, playwright, puppeteer, scraping"
   category: "browser-automation"
 ---
-
-# Lightpanda
-
-Skill for working with Lightpanda, a Zig-based headless browser for AI agents and automation.
 
 ## When to use
 
@@ -16,6 +12,7 @@ Skill for working with Lightpanda, a Zig-based headless browser for AI agents an
 - The user needs a lightweight headless browser with CDP compatibility.
 - The user wants automation/scraping with Playwright, Puppeteer, chromedp, or Python.
 - The user needs a CDP server endpoint for remote browser control.
+- Use this skill when page content must be extracted but built-in tools cannot reliably retrieve it.
 
 ## Quick commands
 

@@ -5,7 +5,6 @@ metadata:
   tags: "youtube, transcript, subtitles, captions, localization"
   category: "media-processing"
 license: MIT
-allowed-tools: Bash
 ---
 
 # yotube-transcribe

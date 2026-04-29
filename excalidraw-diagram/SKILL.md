@@ -4,6 +4,7 @@ description: Create Excalidraw diagram JSON files that make visual arguments. Us
 metadata:
   tags: "excalidraw, diagram, architecture, workflow, visualization"
   category: "diagramming"
+license: MIT
 ---
 
 # Excalidraw Diagram Creator
