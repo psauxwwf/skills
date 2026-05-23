@@ -1,8 +1,8 @@
 ---
 name: lightpanda
-description: Use for lightpanda CLI usage, CDP server setup, and browser automation/scraping via Playwright, Puppeteer, chromedp, or Python.
+description: Use when the user needs Lightpanda-specific browser work for rendering JavaScript-heavy pages, fetching post-JS HTML, exposing a CDP endpoint, or running browser automation and scraping flows via Playwright, Puppeteer, chromedp, or Python against a lightweight headless browser.
 metadata:
-  tags: "lightpanda, headless-browser, cdp, playwright, puppeteer, scraping"
+  tags: "lightpanda, browser-automation, headless-browser, javascript-rendering, dynamic-pages, cdp, devtools-protocol, playwright, puppeteer, chromedp, web-scraping, rendered-html, page-fetching"
   category: "browser-automation"
 ---
 

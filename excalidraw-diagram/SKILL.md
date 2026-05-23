@@ -1,8 +1,8 @@
 ---
 name: excalidraw-diagram
-description: Create Excalidraw diagram JSON files that make visual arguments. Use when the user wants to visualize workflows, architectures, or concepts.
+description: Use when the user wants an Excalidraw diagram that explains something visually through architecture maps, workflows, process flows, system relationships, concept diagrams, or argument-driven visuals exported as `.excalidraw` JSON.
 metadata:
-  tags: "excalidraw, diagram, architecture, workflow, visualization"
+  tags: "excalidraw, diagram, visualization, architecture, workflow, process-flow, systems-design, concept-map, json-output, visual-explanation, annotated-diagram"
   category: "diagramming"
 license: MIT
 ---

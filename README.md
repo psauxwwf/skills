@@ -2,9 +2,10 @@
 
 ## Available skills
 
-- `excalidraw-diagram` - create Excalidraw JSON diagrams for workflows, architectures, and concepts.
-- `lightpanda` - use Lightpanda for browser automation, CDP setup, and rendered page extraction.
-- `yotube-transcribe` - extract YouTube subtitles/transcript text into clean markdown with metadata.
+- `excalidraw-diagram` - create Excalidraw diagrams for architectures, workflows, system relationships, and concept maps.
+- `iwe` - work with IWE Markdown knowledge graphs to search notes, retrieve context, refactor links, analyze structure, and export graphs.
+- `lightpanda` - use Lightpanda for JavaScript-heavy pages, rendered HTML extraction, CDP setup, and browser automation/scraping.
+- `yotube-transcribe` - extract YouTube spoken content into transcripts, subtitles, timestamped quotes, summaries, and markdown output.
 
 ## Install all skills
 
@@ -20,6 +21,7 @@ Install only the skill you need:
 
 ```bash
 skills add psauxwwf/skills --skill excalidraw-diagram
+skills add psauxwwf/skills --skill iwe
 skills add psauxwwf/skills --skill lightpanda
 skills add psauxwwf/skills --skill yotube-transcribe
 ```
