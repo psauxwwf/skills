@@ -5,6 +5,7 @@ import shutil
 
 root = Path("iwe")
 docs = [root / "docs/cli.md", *sorted(root.glob("docs/cli-*.md"))]
+spec = root / "docs/spec.md"
 frontmatter = """---
 name: iwe
 description: Use when the user works with an IWE knowledge base and needs to search notes, retrieve hierarchical context, inspect document trees, create or update documents, refactor links, normalize Markdown structure, analyze frontmatter/schema statistics, or export the note graph for AI-agent and documentation workflows.
@@ -55,10 +56,23 @@ for rel_path in docs:
     text = link_re.sub(lambda m: f"[{m.group(1)}]({rewrite_link(m.group(2))})", text)
     chunks.append(text.rstrip())
 
-(root / "SKILL.md").write_text(frontmatter + "\n" + "\n\n".join(chunks) + "\n")
+
+(root / "SKILL.md").write_text(
+    "\n".join(
+        [
+            frontmatter,
+            "[IWE Query Language Specification](./SPEC.md)",
+            "\n\n".join(chunks),
+        ],
+    )
+)
+
+spec.rename(root / "SPEC.md")
 
 for entry in root.iterdir():
     if entry.name == "SKILL.md":
+        continue
+    if entry.name == "SPEC.md":
         continue
     if entry.is_dir() and not entry.is_symlink():
         shutil.rmtree(entry)

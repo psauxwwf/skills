@@ -7,6 +7,8 @@ metadata:
 license: Apache-2.0
 ---
 
+[IWE Query Language Specification](./SPEC.md)
+
 # How to Use in Command Line
 
 IWE provides a powerful command-line interface for managing markdown-based knowledge graphs. The CLI enables you to initialize projects, normalize documents, explore connections, export visualizations, and create consolidated documents.

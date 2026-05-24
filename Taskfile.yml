@@ -7,4 +7,4 @@ tasks:
       - rm -rf iwe
       - git clone https://github.com/iwe-org/iwe.git iwe
       - python3 ./build_iwe_skill.py
-      - prettier --write ./iwe/SKILL.md
+      - prettier --write ./iwe/SKILL.md ./iwe/SPEC.md
