@@ -1,6 +1,14 @@
+---
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
 version: "3"
 
 tasks:
+  agent-browser:
+    desc: Clone agent-browser upstream skill-data and build bundled skill
+    cmds:
+      - python3 ./build_agent_browser_skill.py
+      - prettier --write "./agent-browser/**/*.md"
+
   iwe:
     desc: Clone IWE and build bundled SKILL.md
     cmds:
