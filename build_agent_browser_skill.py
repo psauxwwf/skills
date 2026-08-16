@@ -1,8 +1,8 @@
-from pathlib import Path
+#!/usr/bin/env python3
 import shutil
 import subprocess
 import tempfile
-
+from pathlib import Path
 
 REPO_URL = "https://github.com/vercel-labs/agent-browser.git"
 ROOT = Path("agent-browser")
@@ -52,29 +52,58 @@ def clone_repo(destination: Path) -> None:
     )
 
 
+def skill_doc_name(skill_name: str) -> str:
+    return f"{skill_name}.md"
+
+
+def rewrite_skill_links(root: Path, skill_names: list[str]) -> None:
+    skill_dirs = {(root / name).resolve(): name for name in skill_names}
+
+    for path in root.rglob("*.md"):
+        text = path.read_text()
+        original_text = text
+
+        for skill_dir, skill_name in skill_dirs.items():
+            try:
+                path.resolve().relative_to(skill_dir)
+            except ValueError:
+                continue
+
+            text = text.replace("SKILL.md", skill_doc_name(skill_name))
+            break
+
+        if text != original_text:
+            path.write_text(text)
+
+
 def copy_skill_data(source: Path, target: Path) -> list[dict[str, str]]:
     target.mkdir(parents=True, exist_ok=True)
 
     skills = []
+    copied_skill_names = []
     for entry in sorted(source.iterdir(), key=lambda path: path.name):
         if not entry.is_dir():
             continue
 
-        skill_file = entry / "SKILL.md"
-        if not skill_file.exists():
+        source_skill_file = entry / "SKILL.md"
+        if not source_skill_file.exists():
             continue
 
         destination = target / entry.name
         shutil.copytree(entry, destination)
+        (destination / "SKILL.md").rename(destination / skill_doc_name(entry.name))
+        copied_skill_names.append(entry.name)
 
-        metadata = parse_frontmatter(skill_file.read_text())
+        metadata = parse_frontmatter(source_skill_file.read_text())
         skills.append(
             {
                 "name": metadata.get("name", entry.name),
                 "description": metadata.get("description", ""),
-                "path": f"./{entry.name}/SKILL.md",
+                "path": f"./{entry.name}/{skill_doc_name(entry.name)}",
             }
         )
+
+    rewrite_skill_links(target, copied_skill_names)
 
     return sorted(skills, key=lambda skill: (skill["name"] != "core", skill["name"]))
 
@@ -92,6 +121,7 @@ def write_main_skill(skills: list[dict[str, str]]) -> None:
         f"- [`{skill['name']}`]({skill['path']}) - {skill['description']}"
         for skill in helpers
     ]
+    core_path = next(skill["path"] for skill in skills if skill["name"] == "core")
 
     body = f"""# agent-browser
 
@@ -99,7 +129,7 @@ This skill bundles every runtime skill from [`vercel-labs/agent-browser/{UPSTREA
 
 ## How To Use
 
-- Start with [`core`](./core/SKILL.md). It is the primary agent-browser workflow guide and should be read before running `agent-browser` commands.
+- Start with [`core`]({core_path}). It is the primary agent-browser workflow guide and should be read before running `agent-browser` commands.
 - Use the other bundled skills only as helpers when the task leaves normal web-page automation: Electron apps, Slack, exploratory QA, Vercel Sandbox, or AWS Bedrock AgentCore.
 - The skill directories (`./core/`, `./electron/`, and the other helpers) are copied from upstream `skill-data`, including their `references/` and `templates/` directories.
 - Regenerate this skill with `python3 ./build_agent_browser_skill.py`; do not edit generated files by hand unless you intend to fork the upstream content.
@@ -112,7 +142,7 @@ This skill bundles every runtime skill from [`vercel-labs/agent-browser/{UPSTREA
 
 ## Primary Skill
 
-Read [`./core/SKILL.md`](./core/SKILL.md) first. It covers the standard snapshot-and-ref loop, navigation, clicking, filling, extracting text/data, screenshots, tabs, sessions, waiting, auth, and troubleshooting.
+Read [`{core_path}`]({core_path}) first. It covers the standard snapshot-and-ref loop, navigation, clicking, filling, extracting text/data, screenshots, tabs, sessions, waiting, auth, and troubleshooting.
 
 ## Helper Skills
 
@@ -123,10 +153,6 @@ Read [`./core/SKILL.md`](./core/SKILL.md) first. It covers the standard snapshot
 
 
 def main() -> None:
-    if ROOT.exists():
-        shutil.rmtree(ROOT)
-    ROOT.mkdir()
-
     with tempfile.TemporaryDirectory(prefix="agent-browser-skill-") as tmp:
         repo = Path(tmp) / "repo"
         clone_repo(repo)
@@ -134,6 +160,10 @@ def main() -> None:
         source = repo / UPSTREAM_SKILLS_DIR
         if not source.is_dir():
             raise RuntimeError(f"Upstream directory not found: {source}")
+
+        if ROOT.exists():
+            shutil.rmtree(ROOT)
+        ROOT.mkdir()
 
         skills = copy_skill_data(source, ROOT)
 

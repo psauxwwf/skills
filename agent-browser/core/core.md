@@ -21,6 +21,16 @@ agent-browser snapshot -i       # 4. Re-snapshot after any page change
 
 Refs (`@e1`, `@e2`, ...) are assigned fresh on every snapshot. They become **stale the moment the page changes** — after clicks that navigate, form submits, dynamic re-renders, dialog opens. Always re-snapshot before your next ref interaction.
 
+## Always use your own session
+
+Before your first command, set a named session for the whole task:
+
+```bash
+export AGENT_BROWSER_SESSION="$(agent-browser session id --scope worktree --prefix task)"
+```
+
+The default (unnamed) session is a single shared browser: it is shared with every other agent on the machine and it persists across conversations, so working in it can hijack another agent's page mid-task or navigate away from something the human left open. Every example below assumes a named session is active. See [Run multiple browsers in parallel](#run-multiple-browsers-in-parallel) and `references/session-management.md`.
+
 ## Quickstart
 
 ```bash
@@ -46,7 +56,7 @@ agent-browser click @e5                        # click a result
 agent-browser screenshot result.png
 ```
 
-The browser stays running across commands so these feel like a single session. Use `agent-browser close` (or `close --all`) when you're done.
+The browser stays running across commands so these feel like a single session. By default, an inactive daemon saves configured restore state, closes its headless browser, and exits after one hour; the next command starts it again. Without `--restore` or another restore key, shutdown discards transient browser state and open tabs. Dashboard mouse, keyboard, and touch input count as activity. Headed browsers, Safari and iOS WebDriver sessions, and user-attached browsers are exempt from the default; provider-owned cloud browsers are not. Use `--idle-timeout <time>` or `AGENT_BROWSER_IDLE_TIMEOUT_MS` to tune the timeout, and use `0` to disable it. Still run `agent-browser close` (or `close --all`) when you're done.
 
 ## MCP integration
 
@@ -58,7 +68,7 @@ agent-browser mcp --tools all
 agent-browser mcp --tools core,network,react
 ```
 
-Configure the MCP client to launch `agent-browser` with `["mcp"]`. The server defaults to MCP protocol 2025-11-25 and accepts older supported client protocol versions during initialization. The default tools profile is `core`, which keeps MCP context small for everyday browser automation. Use `--tools all` for the full typed CLI parity surface, or combine profiles with commas, such as `--tools core,network,react`. Profiles are `core`, `network`, `state`, `debug`, `tabs`, `react`, `mobile`, and `all`; the `debug` profile includes accessibility audits, plugin registry, and command.run tools. Each tool accepts typed arguments plus `extraArgs` for advanced CLI flags and exact CLI parity. The common `allowedDomains` array maps to `--allowed-domains` and activates the same WebRTC containment and launch-mode restrictions. Tool discovery is paginated and includes read-only/open-world annotations so modern MCP clients can load the large typed surface incrementally. Use the tool `session` argument or `AGENT_BROWSER_SESSION` to isolate browser sessions.
+Configure the MCP client to launch `agent-browser` with `["mcp"]`. The server defaults to MCP protocol 2025-11-25 and accepts older supported client protocol versions during initialization. The default tools profile is `core`, which keeps MCP context small for everyday browser automation. Use `--tools all` for the full typed CLI parity surface, or combine profiles with commas, such as `--tools core,network,react`. Profiles are `core`, `network`, `state`, `debug`, `tabs`, `react`, `mobile`, and `all`; the `debug` profile includes accessibility audits, plugin registry, and command.run tools. Each tool accepts typed arguments plus `extraArgs` for advanced CLI flags and exact CLI parity. The common `allowedDomains` array maps to `--allowed-domains` and activates the same WebRTC containment and launch-mode restrictions, while `idleTimeout` maps to `--idle-timeout`. Tool discovery is paginated and includes read-only/open-world annotations so modern MCP clients can load the large typed surface incrementally. Use the tool `session` argument or `AGENT_BROWSER_SESSION` to isolate browser sessions.
 
 ## eve agent integration
 
@@ -287,7 +297,7 @@ agent-browser tab t2                   # switch to tab t2
 agent-browser tab close t2             # close tab t2
 ```
 
-Stable `tabId`s mean `t2` points at the same tab across commands even when other tabs open or close. After switching, refs from a prior snapshot on a different tab no longer apply — re-snapshot.
+Stable `tabId`s mean `t2` points at the same tab across commands even when other tabs open or close. After switching, refs from a prior snapshot on a different tab no longer apply — re-snapshot. `tab list --json` also reports each tab's CDP `targetId`, accepted anywhere a tab ref is accepted; target ids stay stable across daemon restarts, unlike `t<N>` ids.
 
 Switching has two special cases worth knowing:
 
@@ -306,6 +316,8 @@ agent-browser --session b fill @e1 "bob@test.com"
 ```
 
 `AGENT_BROWSER_SESSION=myapp` sets the default session for the current shell.
+
+When several sessions share one Chrome over `--cdp <port>`, add `--pin-tab` so each session sticks to its own tab. Every session remembers its bound tab across daemon restarts; with `--pin-tab` a command whose bound tab was closed fails with a `tab_gone` error instead of acting on another session's tab. JSON output includes `"code": "tab_gone"`, `data.targetId`, and an optional sanitized `data.lastUrl` for recovery. Recover with `tab new <url>` or pick a tab from `tab list`. The flag is sticky per session, so pass it once (`--no-pin-tab` turns it off again). See `references/session-management.md` for details.
 
 ### Mock network requests
 
@@ -498,6 +510,7 @@ That pulls in:
 - `references/session-management.md` — persistence, multi-session workflows
 - `references/profiling.md` — Chrome DevTools tracing and profiling
 - `references/video-recording.md` — video capture options
+- `references/streaming.md` covers live viewport streaming, remote input, per-client frame rate, and the encoding vars that set bandwidth cost
 - `references/proxy-support.md` — proxy configuration
 - `references/webgpu.md` — screenshots/video of WebGPU pages (three.js, Babylon.js), Linux/CI setup
 - `templates/*` — starter shell scripts for auth, capture, form automation

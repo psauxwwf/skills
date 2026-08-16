@@ -1,7 +1,8 @@
-from pathlib import Path
+#!/usr/bin/env python3
 import posixpath
 import re
 import shutil
+from pathlib import Path
 
 root = Path("iwe")
 docs = [root / "docs/cli.md", *sorted(root.glob("docs/cli-*.md"))]
