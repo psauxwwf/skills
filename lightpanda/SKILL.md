@@ -20,10 +20,21 @@ metadata:
 
 ```bash
 lightpanda fetch --log_format pretty --log_level info --dump html \
-  --user-agent "Mozilla/5.0 (X11; Linux x86_64; rv:149.0) Gecko/20100101 Firefox/149.0" \
+  --user-agent "AppleWebKit/537.36 (X11; Linux x86_64) (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36" \
   --insecure-disable-tls-host-verification \
-  "https://example.com/psauxwwf?tab=repositories"
+  "https://www.ident.me/"
 ```
+
+Use `--dump markdown` instead of `--dump html` to extract the page as Markdown:
+
+```bash
+lightpanda fetch --log_format pretty --log_level info --dump markdown \
+  --user-agent "AppleWebKit/537.36 (X11; Linux x86_64) (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36" \
+  --insecure-disable-tls-host-verification \
+  "https://ident.me"
+```
+
+Lightpanda rejects reserved browser user-agents; keep custom values printable ASCII and do not include `Mozilla`. For Chrome-like requests, keep the `AppleWebKit`, `Chrome`, and `Safari` tokens, but omit the leading `Mozilla/5.0` token.
 
 ### Start CDP server
 
@@ -124,5 +135,5 @@ asyncio.run(main())
 
 ## References
 
-- https://github.com/lightpanda-io/browser
-- https://github.com/lightpanda-io/zig-js-runtime
+- <https://github.com/lightpanda-io/browser>
+- <https://github.com/lightpanda-io/zig-js-runtime>
