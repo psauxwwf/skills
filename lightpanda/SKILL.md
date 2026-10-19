@@ -20,6 +20,7 @@ metadata:
 
 ```bash
 lightpanda fetch --log_format pretty --log_level info --dump html \
+  --wait-until done --wait-ms 30000 \
   --user-agent "AppleWebKit/537.36 (X11; Linux x86_64) (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36" \
   --insecure-disable-tls-host-verification \
   "https://www.ident.me/"
@@ -29,10 +30,13 @@ Use `--dump markdown` instead of `--dump html` to extract the page as Markdown:
 
 ```bash
 lightpanda fetch --log_format pretty --log_level info --dump markdown \
+  --wait-until done --wait-ms 30000 \
   --user-agent "AppleWebKit/537.36 (X11; Linux x86_64) (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36" \
   --insecure-disable-tls-host-verification \
   "https://ident.me"
 ```
+
+Use `--wait-until done` for CLI fetches to wait for pending scripts and network requests to finish before dumping the page. `--wait-ms 30000` limits waiting to 30 seconds; it is not a fixed sleep. Pages with continuous background activity may reach the timeout, and waiting does not fix failed requests or unavailable IPv6. The `done` value is specific to Lightpanda CLI/PandaScript; do not use it as Playwright or Puppeteer `waitUntil`.
 
 Lightpanda rejects reserved browser user-agents; keep custom values printable ASCII and do not include `Mozilla`. For Chrome-like requests, keep the `AppleWebKit`, `Chrome`, and `Safari` tokens, but omit the leading `Mozilla/5.0` token.
 
