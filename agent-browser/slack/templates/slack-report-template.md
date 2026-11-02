@@ -25,20 +25,20 @@
 
 List of channels with unread messages:
 
-| Channel        | Unread Count | Last Activity     | Notes                    |
-| -------------- | ------------ | ----------------- | ------------------------ |
-| #engineering   | 12           | Today 2:45 PM     | Active discussion thread |
-| #announcements | 3            | Yesterday 5:30 PM | Team updates             |
-| #random        | 5            | Today 11:20 AM    | Various topics           |
+| Channel | Unread Count | Last Activity | Notes |
+|---------|-------------|---------------|-------|
+| #engineering | 12 | Today 2:45 PM | Active discussion thread |
+| #announcements | 3 | Yesterday 5:30 PM | Team updates |
+| #random | 5 | Today 11:20 AM | Various topics |
 
 ---
 
 ## Unread Direct Messages
 
-| User/Group    | Message Count | Last Message  | Preview               |
-| ------------- | ------------- | ------------- | --------------------- |
-| @alice        | 2             | Today 3:15 PM | "Are you free to..."  |
-| @product-team | 5             | Today 2:00 PM | Sync scheduled for... |
+| User/Group | Message Count | Last Message | Preview |
+|------------|--------------|--------------|---------|
+| @alice | 2 | Today 3:15 PM | "Are you free to..." |
+| @product-team | 5 | Today 2:00 PM | Sync scheduled for... |
 
 ---
 
@@ -60,11 +60,11 @@ List of channels with unread messages:
 
 ## Most Active Channels (by recent activity)
 
-| Rank | Channel         | Activity | Participants |
-| ---- | --------------- | -------- | ------------ |
-| 1    | #engineering    | High     | 15+ active   |
-| 2    | #general        | High     | 10+ active   |
-| 3    | #product-design | Medium   | 8+ active    |
+| Rank | Channel | Activity | Participants |
+|------|---------|----------|--------------|
+| 1 | #engineering | High | 15+ active |
+| 2 | #general | High | 10+ active |
+| 3 | #product-design | Medium | 8+ active |
 
 ---
 
@@ -111,10 +111,10 @@ List of channels with unread messages:
 
 ### Most Reacted-To Messages
 
-| Message                 | Emoji | Count | Channel      |
-| ----------------------- | ----- | ----- | ------------ |
-| "Shipped to production" | 🎉    | 8     | #engineering |
-| "FYI the site is down"  | 🚨    | 12    | #incidents   |
+| Message | Emoji | Count | Channel |
+|---------|-------|-------|---------|
+| "Shipped to production" | 🎉 | 8 | #engineering |
+| "FYI the site is down" | 🚨 | 12 | #incidents |
 
 ---
 
@@ -147,12 +147,12 @@ List of channels with unread messages:
 
 ## Screenshots
 
-| File                     | Description                    |
-| ------------------------ | ------------------------------ |
-| `activity-tab.png`       | Activity tab showing unreads   |
-| `dms-overview.png`       | DM list with unread indicators |
-| `channels-full-list.png` | Complete channel list          |
-| `engineering-thread.png` | Active engineering thread      |
+| File | Description |
+|------|-------------|
+| `activity-tab.png` | Activity tab showing unreads |
+| `dms-overview.png` | DM list with unread indicators |
+| `channels-full-list.png` | Complete channel list |
+| `engineering-thread.png` | Active engineering thread |
 
 ---
 
@@ -160,7 +160,7 @@ List of channels with unread messages:
 
 ### Snapshot Output
 
-```
+```text
 [Paste snapshot -i output here]
 ```
 

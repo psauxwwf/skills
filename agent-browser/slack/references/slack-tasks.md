@@ -75,6 +75,7 @@ Get a complete list of all channels you have access to.
    ```
 
 4. **Parse snapshot for channel list**
+
    ```bash
    agent-browser snapshot --json > channels.json
    # Search JSON for treeitem elements with level=2 under "Channels" section
@@ -111,7 +112,8 @@ Find all messages/threads mentioning specific terms.
    # Identify search input ref from snapshot
    agent-browser fill @e_search_input "your keyword"
    agent-browser press Enter
-   agent-browser wait --load networkidle
+   # Match the submitted query so a repeated search cannot reuse the old route.
+   agent-browser wait --fn "location.pathname.includes('/search') && new URL(location.href).searchParams.get('q') === 'your keyword'"
    ```
 
 3. **Capture results**
@@ -156,7 +158,8 @@ Watch a channel and capture new messages/engagement.
    agent-browser snapshot -i
    # Find channel ref from sidebar
    agent-browser click @e_channel_ref
-   agent-browser wait --load networkidle
+   # Replace `engineering` with the clicked channel's name, or wait for its known URL:
+   agent-browser wait --fn "document.querySelector('[data-qa=\"channel_header\"]')?.innerText.includes('engineering')"
    ```
 
 2. **Check channel info**
@@ -224,6 +227,7 @@ Find who said what, when, and in what context.
    - Reactions: Buttons showing emoji counts
 
 5. **Screenshot key messages**
+
    ```bash
    agent-browser screenshot important-message.png
    agent-browser screenshot --annotate annotated-message.png
@@ -306,7 +310,7 @@ See messages that have been pinned in a channel.
 
 In Slack snapshot, message timestamps appear as links. Example:
 
-```
+```text
 - link "Feb 25th at 10:26:22 AM" [ref=e151]
   - /url: https://vercel.slack.com/archives/C0A5RTN0856/p1772036782543189
 ```
@@ -317,7 +321,7 @@ The URL contains the timestamp in the fragment (`p1772036782543189`). This is a 
 
 ## Pattern: Understanding Channel/Thread Structure
 
-```
+```text
 - treeitem "channel-name" [ref=e94] [level=2]
   - group: (contains channel metadata or sub-items)
 ```
@@ -332,14 +336,14 @@ The URL contains the timestamp in the fragment (`p1772036782543189`). This is a 
 
 These refs vary per session, but follow patterns:
 
-| Element      | Typical Ref Range | How to Find                          |
-| ------------ | ----------------- | ------------------------------------ |
-| Home tab     | e10-e20           | `snapshot -i \| grep "Home"`         |
-| DMs tab      | e10-e20           | `snapshot -i \| grep "DMs"`          |
-| Activity tab | e10-e20           | `snapshot -i \| grep "Activity"`     |
-| Search       | e5-e10            | `snapshot -i \| grep "Search"`       |
-| More unreads | e20-e30           | `snapshot -i \| grep "More unreads"` |
-| Channel refs | e30+              | `snapshot -i \| grep "treeitem"`     |
+| Element | Typical Ref Range | How to Find |
+|---------|------------------|------------|
+| Home tab | e10-e20 | `snapshot -i \| grep "Home"` |
+| DMs tab | e10-e20 | `snapshot -i \| grep "DMs"` |
+| Activity tab | e10-e20 | `snapshot -i \| grep "Activity"` |
+| Search | e5-e10 | `snapshot -i \| grep "Search"` |
+| More unreads | e20-e30 | `snapshot -i \| grep "More unreads"` |
+| Channel refs | e30+ | `snapshot -i \| grep "treeitem"` |
 
 **Always take a fresh snapshot** to find current refs for the current session.
 
@@ -373,8 +377,8 @@ If you can't find an element:
    ```
 
 4. **Wait for page to load**
+
    ```bash
-   agent-browser wait --load networkidle
-   agent-browser wait 1000
+   agent-browser wait --fn "document.querySelector('[role=main]')"
    agent-browser snapshot -i
    ```

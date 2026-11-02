@@ -83,7 +83,9 @@ agent-browser snapshot -i
 # Look for channel name in the list (e.g., "engineering", "product-design")
 # Click on the channel treeitem ref
 agent-browser click @e94  # Example: engineering channel ref
-agent-browser wait --load networkidle
+# Replace `engineering` with the clicked channel's name so the old channel
+# header cannot satisfy the wait while the new channel is still rendering.
+agent-browser wait --fn "document.querySelector('[data-qa=\"channel_header\"]')?.innerText.includes('engineering')"
 agent-browser screenshot channel.png
 ```
 
@@ -95,7 +97,8 @@ agent-browser snapshot -i
 agent-browser click @e5  # Search button (typical ref)
 agent-browser fill @e_search "keyword"
 agent-browser press Enter
-agent-browser wait --load networkidle
+# Match the submitted query so a repeated search cannot reuse the old route.
+agent-browser wait --fn "location.pathname.includes('/search') && new URL(location.href).searchParams.get('q') === 'keyword'"
 agent-browser screenshot search-results.png
 ```
 
@@ -147,7 +150,7 @@ agent-browser get title
 
 Understanding Slack's sidebar helps you navigate efficiently:
 
-```
+```text
 - Threads
 - Huddles
 - Drafts & sent
@@ -282,6 +285,6 @@ echo "See activity.png, dms.png, and unreads.png for full details"
 
 ## References
 
-- **Slack docs**: https://slack.com/help
-- **Web experience**: https://app.slack.com
+- **Slack docs**: <https://slack.com/help>
+- **Web experience**: <https://app.slack.com>
 - **Keyboard shortcuts**: Type `?` in Slack for shortcut list

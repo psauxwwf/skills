@@ -27,11 +27,11 @@ agent-browser stream disable           # Tear it down
 
 Frame encoding is daemon-wide, read once at startup:
 
-| Variable                          | Default      | Notes                                    |
-| --------------------------------- | ------------ | ---------------------------------------- |
-| `AGENT_BROWSER_STREAM_QUALITY`    | `80`         | 0 to 100, clamped                        |
-| `AGENT_BROWSER_STREAM_MAX_WIDTH`  | the viewport | caps the frame, does not resize the page |
-| `AGENT_BROWSER_STREAM_MAX_HEIGHT` | the viewport | same                                     |
+| Variable | Default | Notes |
+|---|---|---|
+| `AGENT_BROWSER_STREAM_QUALITY` | `80` | 0 to 100, clamped |
+| `AGENT_BROWSER_STREAM_MAX_WIDTH` | the viewport | caps the frame, does not resize the page |
+| `AGENT_BROWSER_STREAM_MAX_HEIGHT` | the viewport | same |
 
 The live stream requests jpeg, since a `frame` message carries no format field. An explicit `screencast_start` reconfigures the same underlying screencast, so a client can still see the format change mid-stream; sniff the bytes rather than assuming. Measured on a busy page at 1280x720: quality 80 gives ~54 KB per frame, quality 20 gives ~25 KB, and quality 20 at 640x360 gives ~9 KB. An unusable value leaves the default.
 
@@ -53,12 +53,8 @@ Every message is JSON text with a `type` field.
   "seq": 41,
   "data": "<base64-encoded-jpeg>",
   "metadata": {
-    "deviceWidth": 1280,
-    "deviceHeight": 720,
-    "pageScaleFactor": 1,
-    "offsetTop": 0,
-    "scrollOffsetX": 0,
-    "scrollOffsetY": 0,
+    "deviceWidth": 1280, "deviceHeight": 720, "pageScaleFactor": 1,
+    "offsetTop": 0, "scrollOffsetX": 0, "scrollOffsetY": 0,
     "timestamp": 1785038682238
   }
 }
@@ -68,7 +64,8 @@ Every message is JSON text with a `type` field.
 
 - `status`: connection state, screencasting flag, viewport size, engine, recording flag. Sent once on connect and again on change.
 - `tabs`: the current tab list, sent on connect when tabs are known and on change.
-- `url`, `console`: navigation and console events.
+- `url`: on Chrome, full-document, History API, and fragment navigation in the active tab's main frame. Child-frame and background-tab navigation is ignored.
+- `console`: console events.
 
 Status, tabs, url, and console travel on an ordered channel: they are delivered in order and are never replaced by a newer message the way frames are. They are not unconditionally durable. A client that falls far enough behind can lag out of that channel and lose messages it never saw, so treat console output as a live feed, not an audit log.
 

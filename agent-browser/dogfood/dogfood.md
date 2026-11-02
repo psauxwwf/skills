@@ -12,13 +12,13 @@ Systematically explore a web application, find issues, and produce a report with
 
 Only the **Target URL** is required. Everything else has sensible defaults -- use them unless the user explicitly provides an override.
 
-| Parameter            | Default                                               | Example override                      |
-| -------------------- | ----------------------------------------------------- | ------------------------------------- |
-| **Target URL**       | _(required)_                                          | `vercel.com`, `http://localhost:3000` |
-| **Session name**     | Slugified domain (e.g., `vercel.com` -> `vercel-com`) | `--session my-session`                |
-| **Output directory** | `./dogfood-output/`                                   | `Output directory: /tmp/qa`           |
-| **Scope**            | Full app                                              | `Focus on the billing page`           |
-| **Authentication**   | None                                                  | `Sign in to user@example.com`         |
+| Parameter | Default | Example override |
+|-----------|---------|-----------------|
+| **Target URL** | _(required)_ | `vercel.com`, `http://localhost:3000` |
+| **Session name** | Slugified domain (e.g., `vercel.com` -> `vercel-com`) | `--session my-session` |
+| **Output directory** | `./dogfood-output/` | `Output directory: /tmp/qa` |
+| **Scope** | Full app | `Focus on the billing page` |
+| **Authentication** | None | `Sign in to user@example.com` |
 
 If the user says something like "dogfood vercel.com", start immediately with defaults. Do not ask clarifying questions unless authentication is mentioned but credentials are missing.
 
@@ -26,7 +26,7 @@ Always use `agent-browser` directly -- never `npx agent-browser`. The direct bin
 
 ## Workflow
 
-```
+```text
 1. Initialize    Set up session, output dirs, report file
 2. Authenticate  Sign in if needed, save state
 3. Orient        Navigate to starting point, take initial snapshot
@@ -51,7 +51,7 @@ Start a named session:
 
 ```bash
 agent-browser --session {SESSION} open {TARGET_URL}
-agent-browser --session {SESSION} wait --load networkidle
+agent-browser --session {SESSION} wait --load domcontentloaded
 ```
 
 ### 2. Authenticate
@@ -64,7 +64,11 @@ agent-browser --session {SESSION} snapshot -i
 agent-browser --session {SESSION} fill @e1 "{EMAIL}"
 agent-browser --session {SESSION} fill @e2 "{PASSWORD}"
 agent-browser --session {SESSION} click @e3
-agent-browser --session {SESSION} wait --load networkidle
+# Replace this with the target app's post-login URL, text, or JS condition:
+agent-browser --session {SESSION} wait --url "{POST_LOGIN_URL_PATTERN}"
+# Or:
+# agent-browser --session {SESSION} wait --text "{POST_LOGIN_TEXT}"
+# agent-browser --session {SESSION} wait --fn "{POST_LOGIN_CONDITION}"
 ```
 
 For OTP/email codes: ask the user, wait for their response, then enter the code.
@@ -209,12 +213,12 @@ agent-browser --session {SESSION} close
 
 ## References
 
-| Reference                                                    | When to Read                                                                           |
-| ------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
+| Reference | When to Read |
+|-----------|--------------|
 | [references/issue-taxonomy.md](references/issue-taxonomy.md) | Start of session -- calibrate what to look for, severity levels, exploration checklist |
 
 ## Templates
 
-| Template                                                                     | Purpose                                       |
-| ---------------------------------------------------------------------------- | --------------------------------------------- |
+| Template | Purpose |
+|----------|---------|
 | [templates/dogfood-report-template.md](templates/dogfood-report-template.md) | Copy into output directory as the report file |

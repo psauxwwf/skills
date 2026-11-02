@@ -32,13 +32,13 @@ agent-browser close
 
 ## Environment Variables
 
-| Variable                    | Description                                        | Default          |
-| --------------------------- | -------------------------------------------------- | ---------------- |
-| `AGENTCORE_REGION`          | AWS region                                         | `us-east-1`      |
-| `AGENTCORE_BROWSER_ID`      | Browser identifier                                 | `aws.browser.v1` |
-| `AGENTCORE_PROFILE_ID`      | Persistent browser profile (cookies, localStorage) | (none)           |
-| `AGENTCORE_SESSION_TIMEOUT` | Session timeout in seconds                         | `3600`           |
-| `AWS_PROFILE`               | AWS CLI profile for credential resolution          | `default`        |
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `AGENTCORE_REGION` | AWS region | `us-east-1` |
+| `AGENTCORE_BROWSER_ID` | Browser identifier | `aws.browser.v1` |
+| `AGENTCORE_PROFILE_ID` | Persistent browser profile (cookies, localStorage) | (none) |
+| `AGENTCORE_SESSION_TIMEOUT` | Session timeout in seconds | `3600` |
+| `AWS_PROFILE` | AWS CLI profile for credential resolution | `default` |
 
 ## Persistent Profiles
 
@@ -61,7 +61,7 @@ AGENTCORE_PROFILE_ID=my-app agent-browser -p agentcore open https://app.example.
 
 When a session starts, AgentCore prints a Live View URL to stderr. Open it in a browser to watch the session in real time from the AWS Console:
 
-```
+```text
 Session: abc123-def456
 Live View: https://us-east-1.console.aws.amazon.com/bedrock-agentcore/browser/aws.browser.v1/session/abc123-def456#
 ```
