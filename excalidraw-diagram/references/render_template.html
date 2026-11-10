@@ -12,12 +12,15 @@
 <body>
   <div id="root"></div>
 
+  <script src="./parse_scene.js"></script>
   <script type="module">
-    import { exportToSvg } from "https://esm.sh/@excalidraw/excalidraw?bundle";
+    // Pin the working CDN build; the 0.18.1 bundle has unresolved dependencies.
+    import { exportToSvg } from "https://esm.sh/@excalidraw/excalidraw@0.18.0?bundle";
+    import LZString from "https://esm.sh/lz-string@1.5.0";
 
     window.renderDiagram = async function(jsonData) {
       try {
-        const data = typeof jsonData === "string" ? JSON.parse(jsonData) : jsonData;
+        const data = parseExcalidrawSource(jsonData, LZString.decompressFromBase64);
         const elements = data.elements || [];
         const appState = data.appState || {};
         const files = data.files || {};

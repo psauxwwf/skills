@@ -5,14 +5,15 @@ set -euo pipefail
 usage() {
   cat >&2 <<EOF
 Usage:
-  $(basename "$0") <input.excalidraw> [output.png] [scale] [max_width]
+  $(basename "$0") <input.excalidraw|input.md> [output.png] [scale] [max_width]
   $(basename "$0") --help
 
-Render an Excalidraw JSON file to PNG using agent-browser and the local
+Render Excalidraw JSON or Obsidian Excalidraw Markdown to PNG using agent-browser and the local
 HTML renderer template at references/render_template.html.
 
 Arguments:
-  input.excalidraw  Path to the source .excalidraw file.
+  input             Source .excalidraw, .excalidraw.md, or .md file.
+                    Markdown must contain a Drawing json/compressed-json block.
   output.png        Optional output PNG path.
                     Default: same path as input with .png extension.
   scale             Optional device pixel ratio for screenshot output.
@@ -24,12 +25,13 @@ Arguments:
 
 Dependencies:
   agent-browser     Browser automation CLI used for rendering and capture.
-  jq                Used to parse rendered SVG dimensions.
+  jq                Used to transfer source text and parse SVG dimensions.
 
 Examples:
   $(basename "$0") diagram.excalidraw
   $(basename "$0") diagram.excalidraw diagram.png
   $(basename "$0") diagram.excalidraw diagram.png 2 1920
+  $(basename "$0") "Zero trust scheme.md" diagram.png
 
 Exit status:
   0  Success
@@ -64,9 +66,9 @@ if [ ! -f "$input" ]; then
 fi
 
 case "$input" in
-  *.excalidraw) ;;
+  *.excalidraw|*.md) ;;
   *)
-    printf 'ERROR: Input must be an .excalidraw file\n' >&2
+    printf 'ERROR: Input must be an .excalidraw or .md file\n' >&2
     exit 1
     ;;
 esac
@@ -74,7 +76,8 @@ esac
 if [ "$#" -ge 2 ]; then
   output="$(realpath -m "$2")"
 else
-  output="${input%.excalidraw}.png"
+  output="${input%.md}"
+  output="${output%.excalidraw}.png"
 fi
 
 scale="${3:-2}"
@@ -96,11 +99,12 @@ cleanup() {
 
 trap cleanup EXIT
 
-agent-browser --session "$session" open "file://$input"
-agent-browser --session "$session" eval 'window.name = document.body.innerText' >/dev/null
 agent-browser --session "$session" open "file://$template"
 agent-browser --session "$session" wait --fn "window.__moduleReady === true"
-agent-browser --session "$session" eval '(async () => await window.renderDiagram(JSON.parse(window.name)))()' >/dev/null
+# Transfer raw text via stdin: Chromium may download Markdown instead of displaying it.
+# JSON quoting also keeps source content out of executable JavaScript.
+jq -Rrs '"(async () => { const result = await window.renderDiagram(" + tojson + "); if (!result.success) throw new Error(result.error); return true; })()"' "$input" |
+  agent-browser --session "$session" eval --stdin >/dev/null
 agent-browser --session "$session" wait --fn "window.__renderComplete === true"
 agent-browser --session "$session" eval '(() => { const svg = document.querySelector("#root svg"); if (!svg) throw new Error("No SVG after render"); const rect = svg.getBoundingClientRect(); return { width: Math.ceil(rect.width), height: Math.ceil(rect.height) }; })()' > "$dims"
 

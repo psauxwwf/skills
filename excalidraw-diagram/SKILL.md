@@ -506,12 +506,12 @@ scripts/render <path-to-file.excalidraw> [output.png] [scale] [max_width]
 
 Arguments:
 
-- `input.excalidraw` - source Excalidraw file
+- `input.excalidraw` - source Excalidraw JSON, or Obsidian `.excalidraw.md` / `.md` with a Drawing `json` or `compressed-json` block
 - `output.png` - optional output path, defaults to the same name with `.png`
 - `scale` - optional device pixel ratio, defaults to `2`
 - `max_width` - optional max rendered width in CSS pixels, defaults to `1920`
 
-This outputs a PNG next to the `.excalidraw` file. Then use the **Read tool** on the PNG to actually view it.
+This outputs a PNG next to the source file (e.g. `diagram.excalidraw.md` → `diagram.png`). Then use the **Read tool** on the PNG to actually view it.
 
 ### The Loop
 
