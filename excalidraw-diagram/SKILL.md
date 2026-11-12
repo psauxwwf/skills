@@ -502,14 +502,16 @@ You cannot judge a diagram from JSON alone. After generating or editing the Exca
 
 ```bash
 scripts/render <path-to-file.excalidraw> [output.png] [scale] [max_width]
+# Omit output.png to save next to the source:
+scripts/render diagram.excalidraw.md 1 2k
 ```
 
 Arguments:
 
 - `input.excalidraw` - source Excalidraw JSON, or Obsidian `.excalidraw.md` / `.md` with a Drawing `json` or `compressed-json` block
-- `output.png` - optional output path, defaults to the same name with `.png`
+- `output.png` - optional output path, defaults to the same name with `.png`. If the second argument is numeric, it is treated as `scale` instead of an output path (use `./1` for a numeric output filename).
 - `scale` - optional device pixel ratio, defaults to `2`
-- `max_width` - optional max rendered width in CSS pixels, defaults to `1920`
+- `max_width` - optional max rendered width in CSS pixels or preset: `720p` = `1280`, `1080p` = `1920` (default), `2k` (QHD) = `2560`, `4k` = `3840`. Presets are case-insensitive. PNG dimensions are multiplied by `scale`; use `scale=1` for the stated pixel widths. Aspect ratio is preserved; diagrams are not upscaled or forced to a fixed height.
 
 This outputs a PNG next to the source file (e.g. `diagram.excalidraw.md` → `diagram.png`). Then use the **Read tool** on the PNG to actually view it.
 

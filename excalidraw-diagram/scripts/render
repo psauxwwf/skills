@@ -6,6 +6,7 @@ usage() {
   cat >&2 <<EOF
 Usage:
   $(basename "$0") <input.excalidraw|input.md> [output.png] [scale] [max_width]
+  $(basename "$0") <input.excalidraw|input.md> <scale> [max_width]
   $(basename "$0") --help
 
 Render Excalidraw JSON or Obsidian Excalidraw Markdown to PNG using agent-browser and the local
@@ -16,12 +17,16 @@ Arguments:
                     Markdown must contain a Drawing json/compressed-json block.
   output.png        Optional output PNG path.
                     Default: same path as input with .png extension.
+                    Omit it when the next argument is a numeric scale.
   scale             Optional device pixel ratio for screenshot output.
                     Default: 2
-  max_width         Optional maximum output width in CSS pixels.
+  max_width         Optional maximum width in CSS pixels, or a preset:
+                    720p = 1280, 1080p = 1920, 2k (QHD) = 2560, 4k = 3840.
                     If the rendered diagram is wider, it is scaled down
                     proportionally before capture.
-                    Default: 1920
+                    PNG pixel dimensions are CSS dimensions multiplied by scale.
+                    Presets do not enforce a fixed height or upscale diagrams.
+                    Default: 1080p (1920 CSS pixels)
 
 Dependencies:
   agent-browser     Browser automation CLI used for rendering and capture.
@@ -31,6 +36,8 @@ Examples:
   $(basename "$0") diagram.excalidraw
   $(basename "$0") diagram.excalidraw diagram.png
   $(basename "$0") diagram.excalidraw diagram.png 2 1920
+  $(basename "$0") diagram.excalidraw diagram.png 1 4k
+  $(basename "$0") diagram.excalidraw 1 2k
   $(basename "$0") "Zero trust scheme.md" diagram.png
 
 Exit status:
@@ -73,15 +80,40 @@ case "$input" in
     ;;
 esac
 
-if [ "$#" -ge 2 ]; then
-  output="$(realpath -m "$2")"
-else
-  output="${input%.md}"
-  output="${output%.excalidraw}.png"
+output="${input%.md}"
+output="${output%.excalidraw}.png"
+shift
+
+# A numeric second argument is scale, not an output filename.
+# Use an explicit path (e.g. ./1) for a purely numeric output filename.
+if [ "$#" -gt 0 ] && [[ ! "$1" =~ ^[+-]?[0-9]+([.][0-9]+)?$ ]]; then
+  output="$(realpath -m "$1")"
+  shift
+fi
+if [ "$#" -gt 2 ]; then
+  printf 'ERROR: Too many arguments after input/output; expected scale and max_width\n' >&2
+  exit 1
 fi
 
-scale="${3:-2}"
-max_width="${4:-1920}"
+scale="${1:-2}"
+max_width="${2:-1080p}"
+if [[ ! "$scale" =~ ^[0-9]+([.][0-9]+)?$ ]] ||
+  ! jq -en --arg scale "$scale" '$scale | tonumber > 0' >/dev/null 2>&1; then
+  printf 'ERROR: scale must be a positive number (for example: 1, 1.5, 2)\n' >&2
+  exit 1
+fi
+case "${max_width,,}" in
+  720p) max_width=1280 ;;
+  1080p) max_width=1920 ;;
+  2k) max_width=2560 ;;
+  4k) max_width=3840 ;;
+  *)
+    if [[ ! "$max_width" =~ ^[1-9][0-9]*$ ]]; then
+      printf 'ERROR: max_width must be a positive integer or one of: 720p, 1080p, 2k, 4k\n' >&2
+      exit 1
+    fi
+    ;;
+esac
 template="$(realpath "$(dirname "$0")/../references/render_template.html")"
 
 if [ ! -f "$template" ]; then
